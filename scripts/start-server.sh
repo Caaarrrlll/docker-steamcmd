@@ -74,6 +74,7 @@ else
   echo "---WINE properly set up---"
 fi
 echo "---Prepare Server---"
+find /tmp -name ".X99*" -exec rm -f {} \; > /dev/null 2>&1
 chmod -R ${DATA_PERM} ${DATA_DIR}
 echo "---Server ready---"
 
@@ -83,7 +84,7 @@ if [ ! -f ${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ]; then
   sleep infinity
 else
   cd ${SERVER_DIR}/ShooterGame/Binaries/Win64
-  wine ArkAscendedServer.exe ${ARK_RUN_STRING} &
+  xvfb-run --auto-servernum --server-args='-screen 0 640x480x24:32' wine ArkAscendedServer.exe ${ARK_RUN_STRING} &
   echo "Waiting for logs..."
   ATTEMPT=0
   sleep 2

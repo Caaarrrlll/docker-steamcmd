@@ -4,7 +4,8 @@ LABEL org.opencontainers.image.authors="venter109@gmail.com"
 LABEL org.opencontainers.image.source="https://github.com/Caaarrrlll/docker-steamcmd-server"
 
 RUN apt-get update && \
-	apt-get -y install lib32gcc-s1 screen xvfb winbind && \
+	apt-get -y install lib32gcc-s1 screen xvfb winbind ca-certificates && \
+    update-ca-certificates && \
     apt-get update && \
 	apt-get -y autoremove
 
