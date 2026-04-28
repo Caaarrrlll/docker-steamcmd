@@ -84,7 +84,7 @@ if [ ! -f ${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ]; then
   sleep infinity
 else
   cd ${SERVER_DIR}/ShooterGame/Binaries/Win64
-  xvfb-run --auto-servernum --server-args='-screen 0 640x480x24:32' wine ArkAscendedServer.exe ${ARK_RUN_STRING} &
+  xvfb-run --auto-servernum --server-args='-screen 0 640x480x24:32' wine64 ArkAscendedServer.exe ${ARK_RUN_STRING} &
   echo "Waiting for logs..."
   ATTEMPT=0
   sleep 2
@@ -98,6 +98,6 @@ else
       echo "Waiting for logs..."
     fi
   done
-  # /opt/scripts/start-watchdog.sh &
+  /opt/scripts/start-watchdog.sh &
   tail -n 9999 -f ${SERVER_DIR}/ShooterGame/Saved/Logs/ShooterGame.log
 fi
