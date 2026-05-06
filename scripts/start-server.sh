@@ -108,7 +108,7 @@ if [ ! -f ${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ]; then
   sleep infinity
 else
   cd ${SERVER_DIR}/ShooterGame/Binaries/Win64
-  wine64 ArkAscendedServer.exe ${MAP}?listen?SessionName="${SERVER_NAME}"?ServerPassword="${SRV_PWD}"${GAME_PARAMS}?ServerAdminPassword="${SRV_ADMIN_PWD}" ${GAME_PARAMS_EXTRA} &
+  wine ArkAscendedServer.exe ${MAP}?listen?SessionName="${SERVER_NAME}"?ServerPassword="${SRV_PWD}"${GAME_PARAMS}?ServerAdminPassword="${SRV_ADMIN_PWD}" ${GAME_PARAMS_EXTRA} &
   echo "Waiting for logs..."
   ATTEMPT=0
   sleep 2
