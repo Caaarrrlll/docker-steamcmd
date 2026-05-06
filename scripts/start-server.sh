@@ -82,7 +82,7 @@ echo "---Prepare Server---"
 chmod -R ${DATA_PERM} ${DATA_DIR}
 echo "---Server ready---"
 
-ARK_RUN_STRING="${MAP}?listen?SessionName="${SERVER_NAME}"?ServerPassword=${SRV_PWD}?ServerAdminPassword=${SRV_ADMIN_PWD}" 
+ARK_RUN_STRING="${MAP}?listen?SessionName=\"${SERVER_NAME}\"?ServerPassword=${SRV_PWD}?ServerAdminPassword=${SRV_ADMIN_PWD}" 
 ARK_RUN_STRING="${ARK_RUN_STRING} ${GAME_PARAMS_EXTRA}"
 if [ "${SRV_CLUSTER_INFO}" != "" ]; then
   ARK_RUN_STRING="${ARK_RUN_STRING} -clusterid=${SRV_CLUSTER_INFO} -clusterDirOverride=/serverdata/serverfiles/clusterfiles"
