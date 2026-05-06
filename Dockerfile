@@ -17,11 +17,13 @@ ENV GAME_ID="2430930" \
 	SERVER_NAME="ASA Docker" \
 	SRV_PWD="Docker" \
 	SRV_ADMIN_PWD="adminDocker" \
-	VALIDATE=""
+	VALIDATE="" \
+	DEBUG=0
 
 ENV GAME_PARAMS="" \
 	GAME_PARAMS_EXTRA="-port=7777 -QueryPort=27015 -WinLiveMaxPlayers=20 -server -log -NoBattlEye" \
-	GAME_MODS=""
+	SRV_CLUSTER_INFO="" \
+	SRV_MOD_IDS=""
 
 ENV UMASK=000 \
 	UID=99 \

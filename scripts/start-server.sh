@@ -82,13 +82,41 @@ echo "---Prepare Server---"
 chmod -R ${DATA_PERM} ${DATA_DIR}
 echo "---Server ready---"
 
+ARK_RUN_STRING="${MAP}?listen?SessionName=${SERVER_NAME}?ServerPassword=${SRV_PWD}?ServerAdminPassword=${SRV_ADMIN_PWD}" 
+ARK_RUN_STRING="${ARK_RUN_STRING} ${GAME_PARAMS_EXTRA}"
+if [ "${SRV_CLUSTER_INFO}" != "" ]; then
+  ARK_RUN_STRING="${ARK_RUN_STRING} -clusterid=${SRV_CLUSTER_INFO} -clusterDirOverride=/serverdata/serverfiles/clusterfiles"
+fi
+if [ "${SRV_MOD_IDS}" != "" ]; then
+  ARK_RUN_STRING="${ARK_RUN_STRING} -mods=${SRV_MOD_IDS}"
+fi
+
+if [ ${DEBUG} -eq 1 ]; then
+    echo -e "DEBUG: Starting server with the following environment variables:"
+    # env | sort
+    # custom params
+    echo -e "DEBUG: Normalized variables:"
+    echo "MAP: ${MAP}"
+    echo "GAME_ID: ${GAME_ID}"
+    echo "SERVER_NAME: ${SERVER_NAME}"
+    echo "SRV_PWD: ${SRV_PWD}"
+    echo "SRV_ADMIN_PWD: ${SRV_ADMIN_PWD}"
+    echo "VALIDATE_CMD: ${VALIDATE_CMD}"
+    echo "LOGIN_CREDENTIALS: ${LOGIN_CREDENTIALS}"
+    echo "SERVER_DIR: ${SERVER_DIR}"
+    echo "STEAMCMD_DIR: ${STEAMCMD_DIR}"
+    echo "Cluster Info: ${SRV_CLUSTER_INFO}"
+    echo "MOD IDs: ${SRV_MOD_IDS}"
+    echo "ARK_RUN_STRING: ${ARK_RUN_STRING}"
+fi
+
 echo "---Start Server---"
 if [ ! -f ${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ]; then
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
   sleep infinity
 else
   cd ${SERVER_DIR}/ShooterGame/Binaries/Win64
-  wine ArkAscendedServer.exe ${MAP}?listen?SessionName="${SERVER_NAME}"?ServerPassword="${SRV_PWD}"${GAME_PARAMS}?ServerAdminPassword="${SRV_ADMIN_PWD}" ${GAME_PARAMS_EXTRA} &
+  wine ArkAscendedServer.exe $ARK_RUN_STRING &
   echo "Waiting for logs..."
   ATTEMPT=0
   sleep 2
