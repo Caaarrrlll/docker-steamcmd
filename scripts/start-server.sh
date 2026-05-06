@@ -25,8 +25,8 @@ else
 fi
 
 LOGIN_CREDENTIALS="anonymous"
-if [[ -n "${STEAM_USERNAME}" && "${STEAM_USERNAME}" != "template" ]] && \
-   [[ -n "${STEAM_PASSWORD}" && "${STEAM_PASSWORD}" != "template" ]]; then    
+if [[ -n "${STEAM_USERNAME}" && "${STEAM_USERNAME}" != "" ]] && \
+   [[ -n "${STEAM_PASSWORD}" && "${STEAM_PASSWORD}" != "" ]]; then    
     LOGIN_CREDENTIALS="${STEAM_USERNAME} ${STEAM_PASSWORD}"
 fi
 
@@ -42,23 +42,21 @@ echo "---Update SteamCMD---"
   +login ${LOGIN_CREDENTIALS} \
   +quit
 
+VALIDATE_CMD=""
+if [[ "${VALIDATE}" == "true" ]]; then
+    VALIDATE_CMD="validate"
+fi
+
 echo "---Update Server---"
 if [ "${VALIDATE}" == "true" ]; then
   echo "---Validating installation---"
-  ${STEAMCMD_DIR}/steamcmd.sh \
-  +@sSteamCmdForcePlatformType windows \
-  +force_install_dir ${SERVER_DIR} \
-  +login ${LOGIN_CREDENTIALS} \
-  +app_update ${GAME_ID} validate \
-  +quit
-else
-  ${STEAMCMD_DIR}/steamcmd.sh \
-  +@sSteamCmdForcePlatformType windows \
-  +force_install_dir ${SERVER_DIR} \
-  +login ${LOGIN_CREDENTIALS} \
-  +app_update ${GAME_ID} \
-  +quit
 fi
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +@sSteamCmdForcePlatformType windows \
+  +force_install_dir ${SERVER_DIR} \
+  +login ${LOGIN_CREDENTIALS} \
+  +app_update ${GAME_ID} ${VALIDATE_CMD} \
+  +quit
 
 export WINEARCH=win64
 export WINEPREFIX=/serverdata/serverfiles/WINE64
