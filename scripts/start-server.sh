@@ -1,63 +1,4 @@
 #!/bin/bash
-
-VALIDATE_CMD=""
-if [[ "${VALIDATE}" == "true" ]]; then
-    VALIDATE_CMD="validate"
-fi
-
-LOGIN_CREDENTIALS="anonymous"
-if [[ -n "${STEAM_USERNAME}" && "${STEAM_USERNAME}" != "template" ]] && \
-   [[ -n "${STEAM_PASSWORD}" && "${STEAM_PASSWORD}" != "template" ]]; then    
-    LOGIN_CREDENTIALS="${STEAM_USERNAME} ${STEAM_PASSWORD}"
-fi
-
-ARK_BIN="${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe"
-ARK_DIR="${SERVER_DIR}/ShooterGame/Binaries/Win64"
-ARK_RUN_STRING="${MAP}?listen?SessionName=${SERVER_NAME}?ServerPassword=${SRV_PWD}?ServerAdminPassword=${SRV_ADMIN_PWD} ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}"
-
-if [ ${DEBUG} -eq 1 ]; then
-    echo -e "${YELLOW}DEBUG: Starting server with the following environment variables:${NC}"
-    env | sort
-    # custom params
-    echo -e "${YELLOW}DEBUG: Normalized variables:${NC}"
-    echo "MAP: ${MAP}"
-    echo "GAME_ID: ${GAME_ID}"
-    echo "SERVER_NAME: ${SERVER_NAME}"
-    echo "SRV_PWD: ${SRV_PWD}"
-    echo "SRV_ADMIN_PWD: ${SRV_ADMIN_PWD}"
-    echo "VALIDATE_CMD: ${VALIDATE_CMD}"
-    echo "LOGIN_CREDENTIALS: ${LOGIN_CREDENTIALS}"
-    echo "SERVER_DIR: ${SERVER_DIR}"
-    echo "STEAMCMD_DIR: ${STEAMCMD_DIR}"
-    ARK_RUN_STRING="Astraeos_WP?listen?SessionName=ToolsTest?ServerPassword=Tools123?ServerAdminPassword=AdminTools123  -port=7766 -QueryPort=27001 -WinLiveMaxPlayers=20 -server -log -NoBattlEye -clusterid=toolscluster -clusterDirOverride=/serverdata/serverfiles/clusterfiles -mods=947733,934401,947033,942024,1299726,1188679,930436"
-fi
-
-if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
-    echo "SteamCMD not found!"
-    wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz 
-    tar --directory ${STEAMCMD_DIR} -xvzf /serverdata/steamcmd/steamcmd_linux.tar.gz
-    rm ${STEAMCMD_DIR}/steamcmd_linux.tar.gz
-fi
-
-echo "---Update SteamCMD---"
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +login ${LOGIN_CREDENTIALS} \
-    +quit
-
-echo "---Update Server---"
-echo "---Validating installation---"
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ${SERVER_DIR} \
-    +login ${LOGIN_CREDENTIALS} \
-    +app_update ${GAME_ID} ${VALIDATE_CMD} \
-    +quit
-
-echo "---Prepare Server---"
-find /tmp -name ".X99*" -exec rm -f {} \; > /dev/null 2>&1
-chmod -R ${DATA_PERM} ${DATA_DIR}
-echo "---Server ready---"
-
 echo "---Checking the maximum map count per process...---"
 CUR_MAX_MAP_COUNT=$(cat /proc/sys/vm/max_map_count)
 if [[ $CUR_MAX_MAP_COUNT -ge 256000 ]]; then
@@ -83,6 +24,40 @@ else
   sleep infinity
 fi
 
+LOGIN_CREDENTIALS="anonymous"
+if [[ -n "${STEAM_USERNAME}" && "${STEAM_USERNAME}" != "" ]] && \
+   [[ -n "${STEAM_PASSWORD}" && "${STEAM_PASSWORD}" != "" ]]; then    
+    LOGIN_CREDENTIALS="${STEAM_USERNAME} ${STEAM_PASSWORD}"
+fi
+
+if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
+  echo "SteamCMD not found!"
+  wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz 
+  tar --directory ${STEAMCMD_DIR} -xvzf /serverdata/steamcmd/steamcmd_linux.tar.gz
+  rm ${STEAMCMD_DIR}/steamcmd_linux.tar.gz
+fi
+
+echo "---Update SteamCMD---"
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +login ${LOGIN_CREDENTIALS} \
+  +quit
+
+VALIDATE_CMD=""
+if [[ "${VALIDATE}" == "true" ]]; then
+    VALIDATE_CMD="validate"
+fi
+
+echo "---Update Server---"
+if [ "${VALIDATE}" == "true" ]; then
+  echo "---Validating installation---"
+fi
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +@sSteamCmdForcePlatformType windows \
+  +force_install_dir ${SERVER_DIR} \
+  +login ${LOGIN_CREDENTIALS} \
+  +app_update ${GAME_ID} ${VALIDATE_CMD} \
+  +quit
+
 export WINEARCH=win64
 export WINEPREFIX=/serverdata/serverfiles/WINE64
 export WINEDEBUG=-all
@@ -107,13 +82,41 @@ echo "---Prepare Server---"
 chmod -R ${DATA_PERM} ${DATA_DIR}
 echo "---Server ready---"
 
+ARK_RUN_STRING="${MAP}?listen?SessionName=${SERVER_NAME}?ServerPassword=${SRV_PWD}?ServerAdminPassword=${SRV_ADMIN_PWD}" 
+ARK_RUN_STRING="${ARK_RUN_STRING} ${GAME_PARAMS_EXTRA}"
+if [ "${SRV_CLUSTER_INFO}" != "" ]; then
+  ARK_RUN_STRING="${ARK_RUN_STRING} -clusterid=${SRV_CLUSTER_INFO} -clusterDirOverride=/serverdata/serverfiles/clusterfiles"
+fi
+if [ "${SRV_MOD_IDS}" != "" ]; then
+  ARK_RUN_STRING="${ARK_RUN_STRING} -mods=${SRV_MOD_IDS}"
+fi
+
+if [ ${DEBUG} -eq 1 ]; then
+    echo -e "DEBUG: Starting server with the following environment variables:"
+    # env | sort
+    # custom params
+    echo -e "DEBUG: Normalized variables:"
+    echo "MAP: ${MAP}"
+    echo "GAME_ID: ${GAME_ID}"
+    echo "SERVER_NAME: ${SERVER_NAME}"
+    echo "SRV_PWD: ${SRV_PWD}"
+    echo "SRV_ADMIN_PWD: ${SRV_ADMIN_PWD}"
+    echo "VALIDATE_CMD: ${VALIDATE_CMD}"
+    echo "LOGIN_CREDENTIALS: ${LOGIN_CREDENTIALS}"
+    echo "SERVER_DIR: ${SERVER_DIR}"
+    echo "STEAMCMD_DIR: ${STEAMCMD_DIR}"
+    echo "Cluster Info: ${SRV_CLUSTER_INFO}"
+    echo "MOD IDs: ${SRV_MOD_IDS}"
+    echo "ARK_RUN_STRING: ${ARK_RUN_STRING}"
+fi
+
 echo "---Start Server---"
 if [ ! -f ${SERVER_DIR}/ShooterGame/Binaries/Win64/ArkAscendedServer.exe ]; then
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
   sleep infinity
 else
   cd ${SERVER_DIR}/ShooterGame/Binaries/Win64
-  wine ArkAscendedServer.exe ${MAP}?listen?SessionName="${SERVER_NAME}"?ServerPassword="${SRV_PWD}"${GAME_PARAMS}?ServerAdminPassword="${SRV_ADMIN_PWD}" ${GAME_PARAMS_EXTRA} &
+  wine ArkAscendedServer.exe $ARK_RUN_STRING &
   echo "Waiting for logs..."
   ATTEMPT=0
   sleep 2
