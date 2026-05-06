@@ -1,59 +1,4 @@
 #!/bin/bash
-if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
-  echo "SteamCMD not found!"
-  wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz 
-  tar --directory ${STEAMCMD_DIR} -xvzf /serverdata/steamcmd/steamcmd_linux.tar.gz
-  rm ${STEAMCMD_DIR}/steamcmd_linux.tar.gz
-fi
-
-echo "---Update SteamCMD---"
-if [ "${USERNAME}" == "" ]; then
-  ${STEAMCMD_DIR}/steamcmd.sh \
-  +login anonymous \
-  +quit
-else
-  ${STEAMCMD_DIR}/steamcmd.sh \
-  +login ${USERNAME} ${PASSWRD} \
-  +quit
-fi
-
-echo "---Update Server---"
-if [ "${USERNAME}" == "" ]; then
-  if [ "${VALIDATE}" == "true" ]; then
-    echo "---Validating installation---"
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ${SERVER_DIR} \
-    +login anonymous \
-    +app_update ${GAME_ID} validate \
-    +quit
-  else
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ${SERVER_DIR} \
-    +login anonymous \
-    +app_update ${GAME_ID} \
-    +quit
-  fi
-else
-  if [ "${VALIDATE}" == "true" ]; then
-    echo "---Validating installation---"
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ${SERVER_DIR} \
-    +login ${USERNAME} ${PASSWRD} \
-    +app_update ${GAME_ID} validate \
-    +quit
-  else
-    ${STEAMCMD_DIR}/steamcmd.sh \
-    +@sSteamCmdForcePlatformType windows \
-    +force_install_dir ${SERVER_DIR} \
-    +login ${USERNAME} ${PASSWRD} \
-    +app_update ${GAME_ID} \
-    +quit
-  fi
-fi
-
 echo "---Checking the maximum map count per process...---"
 CUR_MAX_MAP_COUNT=$(cat /proc/sys/vm/max_map_count)
 if [[ $CUR_MAX_MAP_COUNT -ge 256000 ]]; then
@@ -79,9 +24,46 @@ else
   sleep infinity
 fi
 
+LOGIN_CREDENTIALS="anonymous"
+if [[ -n "${STEAM_USERNAME}" && "${STEAM_USERNAME}" != "template" ]] && \
+   [[ -n "${STEAM_PASSWORD}" && "${STEAM_PASSWORD}" != "template" ]]; then    
+    LOGIN_CREDENTIALS="${STEAM_USERNAME} ${STEAM_PASSWORD}"
+fi
+
+if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
+  echo "SteamCMD not found!"
+  wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz 
+  tar --directory ${STEAMCMD_DIR} -xvzf /serverdata/steamcmd/steamcmd_linux.tar.gz
+  rm ${STEAMCMD_DIR}/steamcmd_linux.tar.gz
+fi
+
+echo "---Update SteamCMD---"
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +login ${LOGIN_CREDENTIALS} \
+  +quit
+
+echo "---Update Server---"
+if [ "${VALIDATE}" == "true" ]; then
+  echo "---Validating installation---"
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +@sSteamCmdForcePlatformType windows \
+  +force_install_dir ${SERVER_DIR} \
+  +login ${LOGIN_CREDENTIALS} \
+  +app_update ${GAME_ID} validate \
+  +quit
+else
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +@sSteamCmdForcePlatformType windows \
+  +force_install_dir ${SERVER_DIR} \
+  +login ${LOGIN_CREDENTIALS} \
+  +app_update ${GAME_ID} \
+  +quit
+fi
+
 export WINEARCH=win64
 export WINEPREFIX=/serverdata/serverfiles/WINE64
 export WINEDEBUG=-all
+
 echo "---Checking if WINE workdirectory is present---"
 if [ ! -d ${SERVER_DIR}/WINE64 ]; then
   echo "---WINE workdirectory not found, creating please wait...---"

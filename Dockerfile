@@ -8,23 +8,28 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/*
 
 ENV DATA_DIR="/serverdata"
-ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd"
-ENV SERVER_DIR="${DATA_DIR}/serverfiles"
-ENV GAME_ID="2430930"
-ENV MAP="TheIsland_WP"
-ENV SERVER_NAME="ASA Docker"
-ENV SRV_PWD="Docker"
-ENV SRV_ADMIN_PWD="adminDocker"
-ENV GAME_PARAMS="?Port=7777"
-ENV GAME_PARAMS_EXTRA="-WinLiveMaxPlayers=20 -server -log -NoBattlEye"
-ENV VALIDATE=""
-ENV UMASK=000
-ENV UID=99
-ENV GID=100
-ENV USERNAME=""
-ENV PASSWRD=""
-ENV USER="steam"
-ENV DATA_PERM=770
+
+ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd" \
+	SERVER_DIR="${DATA_DIR}/serverfiles"
+
+ENV GAME_ID="2430930" \
+	MAP="TheIsland_WP" \
+	SERVER_NAME="ASA Docker" \
+	SRV_PWD="Docker" \
+	SRV_ADMIN_PWD="adminDocker" \
+	VALIDATE=""
+
+ENV GAME_PARAMS="" \
+	GAME_PARAMS_EXTRA="-port=7777 -QueryPort=27015 -WinLiveMaxPlayers=20 -server -log -NoBattlEye" \
+	GAME_MODS=""
+
+ENV UMASK=000 \
+	UID=99 \
+	GID=100 \
+	STEAM_USERNAME="" \
+	STEAM_PASSWRD="" \
+	USER="steam" \
+	DATA_PERM=770
 
 RUN mkdir $DATA_DIR && \
 	mkdir $STEAMCMD_DIR && \
@@ -34,7 +39,7 @@ RUN mkdir $DATA_DIR && \
 	ulimit -n 2048
 
 ADD /scripts/ /opt/scripts/
-RUN chmod -R 770 /opt/scripts/
+RUN chmod -R $DATA_PERM /opt/scripts/
 
 #Server Start
 ENTRYPOINT ["/opt/scripts/start.sh"]
